@@ -83,4 +83,8 @@ export class UsersService {
     }
     return deletedUser;
   }
+
+  async findByEmail(email: string){
+    return await this.userModel.findOne({email});
+  }
 }
