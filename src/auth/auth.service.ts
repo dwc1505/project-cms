@@ -11,20 +11,19 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async signIn(email: string, pass: string): Promise<any> {
+  async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
-    if (!user) {
-      throw new UnauthorizedException('Không tìm thấy email');
-    }
+    if (!user) return null;
 
     const isValidPassword = await comparePasswordHelper(pass, user.password);
-    if (!isValidPassword) {
-      throw new UnauthorizedException('Email/Pass không hợp lệ');
-    }
-    const payload = { sub: user.id, email: user.email };
+    if (!isValidPassword) return null;
+
+    return user;
+  }
+  async login(user: any) {
+    const payload = { username: user.email, sub: user.id };
     return {
-      message: `Đăng nhập thành công`,
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: this.jwtService.sign(payload),
     };
   }
 
