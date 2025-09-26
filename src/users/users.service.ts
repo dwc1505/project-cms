@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { hashPasswordHelper } from 'src/helper/util';
+import { CreateAuthDto } from 'src/auth/dto/create-auth.dto';
 
 @Injectable()
 export class UsersService {
@@ -86,5 +87,21 @@ export class UsersService {
 
   async findByEmail(email: string){
     return await this.userModel.findOne({email});
+  }
+
+  async handleRegister(registerDto: CreateAuthDto){
+    const {name, email, password} = registerDto;
+    const isExist = await this.isEmailExist(email);
+    if(isExist){
+      throw new BadRequestException(`Email ${email} đã tồn tại.Vui lòng sử dụng email khác`)
+    }
+    const hashPassword = await hashPasswordHelper(password);
+    const user = await this.userModel.create({
+      name,email,password: hashPassword
+    })
+    return{
+      message: `Đăng ký thành công`,
+      user
+    }
   }
 }
